@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Presentation</title>
+
   <style>
     body {
       margin: 0;
@@ -54,23 +55,26 @@
   let currentSlide = 1;
   const slideFrame = document.getElementById("slide");
 
-  function goToSlide(n) {
-    if (n < 1 || n > totalSlides) return;
-    currentSlide = n;
-    slideFrame.src = `slide${n}.html`;
+  const slideCache = {};
+
+  async function preloadSlides() {
+    for (let i = 1; i <= totalSlides; i++) {
+      const res = await fetch(`slide${i}.html`);
+      slideCache[i] = await res.text();
+    }
   }
 
-  // Keyboard controls
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "ArrowRight") {
-      goToSlide(currentSlide + 1);
-    }
-    if (e.key === "ArrowLeft") {
-      goToSlide(currentSlide - 1);
-    }
+  function goToSlide(n) {
+    if (!slideCache[n]) return;
+    currentSlide = n;
+    slideFrame.srcdoc = slideCache[n];
+  }
+
+  document.addEventListener("keydown", e => {
+    if (e.key === "ArrowRight") goToSlide(currentSlide + 1);
+    if (e.key === "ArrowLeft") goToSlide(currentSlide - 1);
   });
 
-  // Fullscreen toggle
   function toggleFullscreen() {
     if (!document.fullscreenElement) {
       document.documentElement.requestFullscreen();
@@ -79,15 +83,7 @@
     }
   }
 
-  // Preload slides
-  function preloadSlides() {
-    for (let i = 1; i <= totalSlides; i++) {
-      fetch(`slide${i}.html`).catch(() => {});
-    }
-  }
-
-  preloadSlides();
-  goToSlide(1);
+  preloadSlides().then(() => goToSlide(1));
 </script>
 
 </body>
