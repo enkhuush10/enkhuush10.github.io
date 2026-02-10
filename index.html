@@ -7,6 +7,7 @@
     body {
       margin: 0;
       font-family: sans-serif;
+      overflow: hidden;
     }
 
     nav {
@@ -18,6 +19,7 @@
       padding: 10px;
       display: flex;
       gap: 10px;
+      z-index: 10;
     }
 
     nav button {
@@ -35,24 +37,57 @@
 <body>
 
 <nav>
-  <button onclick="loadSlide(1)">1</button>
-  <button onclick="loadSlide(2)">2</button>
-  <button onclick="loadSlide(3)">3</button>
-  <button onclick="loadSlide(4)">4</button>
-  <button onclick="loadSlide(5)">5</button>
-  <button onclick="loadSlide(6)">6</button>
-  <button onclick="loadSlide(7)">7</button>
+  <button onclick="goToSlide(1)">1</button>
+  <button onclick="goToSlide(2)">2</button>
+  <button onclick="goToSlide(3)">3</button>
+  <button onclick="goToSlide(4)">4</button>
+  <button onclick="goToSlide(5)">5</button>
+  <button onclick="goToSlide(6)">6</button>
+  <button onclick="goToSlide(7)">7</button>
+  <button onclick="toggleFullscreen()">⛶ Fullscreen</button>
 </nav>
 
 <iframe id="slide"></iframe>
 
 <script>
-  function loadSlide(n) {
-    document.getElementById("slide").src = `slide${n}.html`;
+  const totalSlides = 7;
+  let currentSlide = 1;
+  const slideFrame = document.getElementById("slide");
+
+  function goToSlide(n) {
+    if (n < 1 || n > totalSlides) return;
+    currentSlide = n;
+    slideFrame.src = `slide${n}.html`;
   }
 
-  // load first slide by default
-  loadSlide(1);
+  // Keyboard controls
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight") {
+      goToSlide(currentSlide + 1);
+    }
+    if (e.key === "ArrowLeft") {
+      goToSlide(currentSlide - 1);
+    }
+  });
+
+  // Fullscreen toggle
+  function toggleFullscreen() {
+    if (!document.fullscreenElement) {
+      document.documentElement.requestFullscreen();
+    } else {
+      document.exitFullscreen();
+    }
+  }
+
+  // Preload slides
+  function preloadSlides() {
+    for (let i = 1; i <= totalSlides; i++) {
+      fetch(`slide${i}.html`).catch(() => {});
+    }
+  }
+
+  preloadSlides();
+  goToSlide(1);
 </script>
 
 </body>
